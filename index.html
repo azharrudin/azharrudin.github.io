@@ -1,169 +1,93 @@
-<html>
-    <head>
-        <meta name="viewport" content="width=device-width">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
-        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
-        <style>
-          body {
-            background: url('C:/Personal/Profile Page/assets/img/bg.png');
-            background-size: 100%;
-          }
-          @media (min-width: 1000px){
-                .desc {
-                    width: 70%;
-                    border-radius: 100%;
-                    word-wrap: break-word;
-                    padding: 5px;
-                    margin-top: 100px;
-
-                }
-                .img {
-                    width: 700px;
-                    border-radius: 15px;
-                    border: 1px solid antiquewhite;
-                    height: 250px;
-                }
-            }
-            @media (max-width: 999px){
-                
-                .desc {
-                    width: 90%;
-
-                    word-wrap: break-word;
-                    border-radius: 100%;
-                    margin-top: 60px;
-                }
-                .img {
-                    border-radius: 15px;
-                    border: 1px solid antiquewhite;
-                    width: 400px;
-                    height: 150px;
-                }
-            }
-            @media (max-width: 500px){
-                .desc {
-                    width: 90%;
-                    word-wrap: break-word;
-                    border-radius: 100%;
-                    margin-top: 30px;
-                }
-                .img {
-                    border-radius: 15px;
-                    border: 1px solid antiquewhite;
-                    width: 300px;
-                    height: 100px;
-                }
-            }
-            * {
-                color: whitesmoke;
-                font-family: 'Montserrat', sans-serif;
-            }
-                    
-        </style>
-    </head>
-    <body style="background: black;">
-        
-        <nav class="navbar navbar-expand-lg navbar-dark">
-            <a class="navbar-brand" href="#">Azhar Rudin</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-              <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-              <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
-                  <a class="nav-link" id="navtentang" href="#">Tentang <span class="sr-only"></span></a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" id="navketerampilan" href="#">Keterampilan </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="navproject" href="#">Project </a>
-                  </li>
-                  <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      Kontak
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                      <a class="dropdown-item" href="#"><i class="bi bi-envelope" style="color: black;"></i> Email (azharrudin0509@gmail.com)</a>
-                      <a class="dropdown-item" href="#"><i class="bi bi-phone" style="color: black;"></i> Telepon (081315181664)</a>
-                    </div>
-                  </li>
-                  
-                </ul>
-            </div>
-          </nav>
-          <div>
-          <div class="container" id="tentang">
-                <p class="desc" style="float:  left;">
-                    <b style="font-size: 30px;">Siapa saya?</b><br>
-                    <span id="tentangspan"></span></p>
-                    <img src="assets/img/raycast.png" class="img" style="padding: 0px;float: right;">
-          </div>
-          <div class="container" id="keterampilan">
-            <br>
-            <p class="desc" style="float:  left;">
-                <b style="font-size: 30px;">Keterampilan Saya</b><br>
-                Saya adalah Fullstack Developer Pemula, terkadang menjadi Mobile Apps Developer dan Game Developer (tahap belajar), berikut ini adalah keterampilan utama saya (saya bukan ahli tapi saya akan berusaha) </p>
-
-                <div style="float: right;padding: 5px;">
-                    <img alt="ikon" src="https://cdn-icons-png.flaticon.com/128/5968/5968672.png" style="padding: 0px;float: right;width: 50px;height: 50px;">
-                    <img alt="ikon" src="https://cdn.freebiesupply.com/logos/large/2x/jquery-1-logo-png-transparent.png" style="padding: 4px;float: right;width: 150px;height: 50px;margin-right: 4px;">
-                    <img alt="ikon" src="https://pluspng.com/img-png/nodejs-png-javascript-node-js-nodejs-icon-download-png-512.png" style="padding: 0px;float: right;width: 70px;height: 50px;margin-right: 4px;">
-                    <img alt="ikon" src="https://cdn.freebiesupply.com/logos/large/2x/php-1-logo-png-transparent.png" style="padding: 0px;float: right;width: 70px;height: 50px;margin-right: 4px;">
-                    <img alt="ikon" src="https://mpng.subpng.com/20180824/ktx/kisspng-mysql-workbench-computer-icons-logo-portable-netwo-thezedt-tech-tips-and-random-thoughts-5b80352110ca84.1955496015351288650688.jpg" style="padding: 0px;float: right;width: 70px;height: 50px;margin-right: 4px;border-radius: 15px;">
-                </div>
-          </div>
-          <div class="container" id="project">
-            <br>
-            <p class="desc" style="float:  left;">
-                <b style="font-size: 30px;">Project Saya?</b><br>
-                Saya memiliki banyak project namun kebanyakan adalah project freelance (tidak boleh akibat hak cipta) dan pembelajaran, sedangkan project berikut sudah jadi<br>Cerdasly: sebuah situs tanya jawab antar pelajar di Indonesia, dengan sistem "school ranking point" yang digunakan untuk menaikkan rank sekolah pengguna
-                <br>XSSCon: alat pentest open source untuk menguji cross site scripting vulnurability (XSS), populer digunakan oleh pentester pemula 
-            </p>
-                <div style="float: right;padding: 5px;">
-                    <img alt="http://github.com/menkrep1337/XSSCon" src="https://raw.githubusercontent.com/menkrep1337/XSSCon/master/images/logo.png" style="padding: 0px;float: right;width: 150px;height: 150px;">
-                    <img src="assets/img/cerdasly.png" style="padding: 0px;float: right;width: 220px;height: 150px;">    
-                </div>
-          </div>
-          </div>
-          <script>
-            var i = 0
-            var txt = "Hi, perkenalkan nama saya Muhammad Tiflanil Azhar Rudin, saya adalah seorang pelajar yang menyukai dunia komputer dan teknologi sejak saya kecil saya menyukai coding sejak saya berumur 13 tahun dan sejak itu saya ingin terus mengasah keterampilan saya agar dapat berguna untuk saya, bangsa dan negara...";
-            var speed = 50; 
-            function typeWriter() {
-                if (i < txt.length) {
-                    document.getElementById("tentangspan").innerHTML += txt.charAt(i);
-                    i++;
-                    setTimeout(typeWriter, speed);
-                }
-            }
-            typeWriter()
-            $("#keterampilan").hide()
-            $("#project").hide()
-            $("#navketerampilan").click(function(){
-                $("#tentang").hide()
-                $("#project").hide()
-                $("#keterampilan").show()
-
-            })
-            $("#navtentang").click(function(){
-                $("#tentang").show()
-                $("#project").hide()
-                $("#keterampilan").hide()
-
-            })
-            $("#navproject").click(function(){
-                $("#tentang").hide()
-                $("#project").show()
-                $("#keterampilan").hide()
-
-            })
-          </script>
-          
-    </body>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Azhar Rudin</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.2/particles.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+  </head>
+  <style>
+    .container-center {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      width: 100%;
+      height: 90vh; /* Set the container's height to the viewport height */
+    }
+  </style>
+  <body>
+    <nav
+      class="navbar navbar-expand-lg navbar-light"
+      style="background-color: transparent; position: absolute"
+    >
+      <div class="container m-4">
+        <a class="navbar-brand" href="#">Azhar Rudin</a>
+    
+      </div>
+    </nav>
+    <canvas class="bg" style="position: absolute"></canvas>
+    <div>
+      <div class="container-center" >
+        <div >
+          <center>
+            My Name is <br />
+            <h3 class="pb-0 mb-0">Azhar Rudin</h3>
+            <small class="text-muted"
+              >i'm junior
+              <span class="text-success"
+                ><b>full stack programmer</b></span
+              ></small
+            ><br />
+            <button class="btn btn-outline-success mt-3">
+              See My Portofolio</button
+            ><br />
+           
+          </center>
+        </div>
+      </div>
+    </div>
+    <!-- Bootstrap JS (optional, you can include this at the end of the body) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      window.onload = function () {
+        Particles.init({
+          selector: ".bg",
+          connectParticles: true,
+          responsive: [
+            {
+              breakpoint: 768,
+              options: {
+                maxParticles: 200,
+                color: "#48F2E3",
+              },
+            },
+            {
+              breakpoint: 425,
+              options: {
+                maxParticles: 50,
+                connectParticles: true,
+              },
+            },
+            {
+              breakpoint: 320,
+              options: {
+                maxParticles: 40,
+                // disables particles.js
+              },
+            },
+          ],
+        });
+      };
+    </script>
+  </body>
 </html>
