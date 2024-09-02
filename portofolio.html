@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Azhar Rudin</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.2/particles.min.js"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  </head>
+
+  <style>
+    .container-center {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      width: 100%;
+      height: 90vh; /* Set the container's height to the viewport height */
+    }
+  </style>
+  <body>
+    <div class="modal" id="myModal">
+      <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title">My Portofolio</h4>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"></button>
+          </div>
+
+          <!-- Modal body -->
+          <div class="modal-body" id="portocard">
+            <h1>Achievement:</h1>
+          </div>
+
+          <!-- Modal footer -->
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-danger"
+              data-bs-dismiss="modal">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <canvas class="bg" style="position: absolute"></canvas>
+    <div>
+      <div class="container-center">
+        <div>
+          <center>
+            <img src="profile.png" width="130" /><br />
+            <h3 class="pb-0 mb-0">Muhammad Tiflanil Azhar Rudin</h3>
+            <small class="text-muted"
+              >i'm junior
+              <span class="text-success"
+                ><b>full stack programmer</b></span
+              ></small
+            ><br />
+            <div class="d-flex justify-content-center">
+              <button
+                class="btn btn-outline-success mt-3"
+                type="button"
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#myModal">
+                See My Portofolio
+              </button>
+              <a
+                href="https://www.linkedin.com/in/muhammad-tiflanil-azhar-rudin-21649123a?trk=blended-typeahead"
+                class="btn btn-success mt-3 ms-2"
+                type="button"
+                class="btn btn-primary">
+                Connect to LinkedIn
+              </a>
+              <a
+              href="https://github.com/azharrudin"
+              class="btn btn-danger mt-3 ms-2"
+              type="button"
+              class="btn btn-primary">
+            My Github Repos
+            </a>
+            </div>
+            <br />
+          </center>
+        </div>
+      </div>
+    </div>
+    <!-- Bootstrap JS (optional, you can include this at the end of the body) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      document.getElementById("portocard").innerHTML =
+        marked.parse(`Hello, my name is Muhammad Tiflanil Azhar Rudin. I am a Computer Science student at Bina Nusantara University (B28) in Kemanggisan, Jakarta. I have experience in Software Development and have participated in various competitions. Below is a summary of my achievements and work experience.
+
+#### Achievement:
+
+*   First place in the Lomba Kompetensi Siswa (LKS) bidang Desktop Development (C#) tingkat Jakarta Pusat .
+*   Participant in the Lomba Kompetensi Siswa (LKS) bidang Desktop Development (C#) tingkat Provinsi DKI Jakarta.
+*   Participant and selected among the top 50 (out of 100 teams) in the  MEA (madani entrepreneurship academy) competition.
+*   Participant in the Youth Social Innovation Awards 2023.
+
+#### Work Experience:
+
+*   IT Support Intern at **PT. Triatra Sinergia Pratama** (Jan 2023 - July 2023)
+    *  Maintained and fixed minor bugs in the company's internal software (called iRIS, developed with Laravel 5 and PostgreSQL).
+    *  Reviewed and checked documents such as invoices, sales orders, purchase orders, etc.
+    *  Checking employee data (absence, salary, etc) from all triatra mining site (timika, HO, adaro)
+*   Remote Fullstack Developer at **Asosiasi Sistem Pembayaran Indonesia** (May 2024 - June - 2024)
+    *  Developed new features like notifications, document upload/delete, and new forms.
+    *  Fixed bugs, mainly in the frontend (e.g., Ajax and Modal Popup bugs).
+    *  Designed new MySQL tables for notifications and utilities.
+    *  Improved database relations in Laravel models.
+    *  Collaborated with QA and Other software engineer using Trello and Git.
+    *  Project Technology: Bootstrap, Laravel Frameworks, MySQL, Moment (website: https://sila.aspi-indonesia.or.id)
+
+#### Projects:
+
+*   **XSSCon**,  A Cross-Site Scripting (XSS) vulnerability scanner tool for websites, developed in Python using BeautifulSoup4 for web scraping. It is designed for beginner cybersecurity students ([https://www.geeksforgeeks.org/xsscon-simple-and-powerful-xss-scanner-tool/](https://www.geeksforgeeks.org/xsscon-simple-and-powerful-xss-scanner-tool/)).
+    `);
+      window.onload = function () {
+        Particles.init({
+          selector: ".bg",
+          connectParticles: true,
+          responsive: [
+            {
+              breakpoint: 768,
+              options: {
+                maxParticles: 200,
+                color: "#48F2E3",
+              },
+            },
+            {
+              breakpoint: 425,
+              options: {
+                maxParticles: 50,
+                connectParticles: true,
+              },
+            },
+            {
+              breakpoint: 320,
+              options: {
+                maxParticles: 40,
+                // disables particles.js
+              },
+            },
+          ],
+        });
+      };
+    </script>
+  </body>
+</html>
