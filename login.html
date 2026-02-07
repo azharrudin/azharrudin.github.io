@@ -3,6 +3,8 @@
     <title>Login - NusacoinX</title>
     <link rel="stylesheet" href="./styles/login.css" />
     <link rel="stylesheet" href="./styles/index.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -20,10 +22,10 @@
             <center>
                 <img src="./styles/assets/logo.png" alt="NusacoinX Logo" style="width: auto;height: 15%;">
                 <h1>Login</h1>
-
+                <span>Welcome back! Please enter your ICP Token to continue.</span>
             </center>
 
-          <label for="username">Username:</label>
+          <label for="username">ICP Token</label>
           <input
             type="text"
             id="username"
@@ -31,13 +33,7 @@
             class="form-control mt-3"
             required />
 
-          <label for="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            class="form-control mt-3"
-            required />
+        
 
           <div class="d-flex justify-content-end">
             <button type="submit" class="btn btn-primary mt-3">Login</button>

@@ -10,6 +10,13 @@
     <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/ScrollToPlugin.min.js"></script>
+      <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+      crossorigin="anonymous"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
@@ -20,44 +27,49 @@
   </head>
   <body>
     <nav class="navbar navbar-expand-lg fixed-top navbar-dark p-2">
-      <a class="navbar-brand border-none" href="#">
-        <img src="./styles/assets/logo.png" style="width: auto; height: 40px" />
-        NusacoinX
-      </a>
+      <div class="container-fluid">
+        <!-- Toggler -->
+        <a class="navbar-brand border-none" href="#">
+          <img
+            src="./styles/assets/logo.png"
+            style="width: auto; height: 40px" />
+          NusacoinX
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarCentered"
+          aria-controls="navbarCentered"
+          aria-expanded="false"
+          aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
 
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-toggle="collapse"
-        data-target="#navbarSupportedContent"
-        aria-controls="navbarSupportedContent"
-        aria-expanded="false"
-        aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div
-        class="collapse navbar-collapse d-flex justify-content-end"
-        id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item">
-            <a class="nav-link" id="about-btn">About</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" id="features-btn">Our Features</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" id="contact-btn">Contact Us</a>
-          </li>
-          <li class="nav-item">
-            <button
-              class="btn btn-outline-success my-2 mx-3 my-sm-0"
-              type="button"
-              onclick="location.href = 'login.html'">
-              Login
-            </button>
-          </li>
-        </ul>
+        <!-- Collapsible content centered -->
+        <div
+          class="collapse navbar-collapse justify-content-end"
+          id="navbarCentered">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+              <a class="nav-link" id="about-btn">About Us</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="features-btn">Our Features</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="contact-btn">Contact Us</a>
+            </li>
+            <li class="nav-item">
+              <button
+                class="btn btn-outline-success my-2 mx-3 my-sm-0"
+                type="button"
+                onclick="location.href = 'login.html'">
+                Login
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
     </nav>
     <div class="w-100 h-100 container-center text-white" id="hero1">
@@ -73,41 +85,48 @@
         </div>
       </div>
     </div>
-    <div class="w-100 h-100 container-center-top pt-5 text-white" id="hero2">
+    <div class="w-100 h-100 container-center  text-white" id="hero2">
       <div class="item-center text-center">
-        <h2 class="pt-3 w-100">About Us</h2>
-        <span>
-          To provide a secure, anonymous, and decentralized platform for<br />
-          trading cryptocurrencies in Indonesia.
-        </span>
+        <div>
+          <h2 class="pt-3">About Us</h2>
+          <span>
+            NusacoinX adalah platform perdagangan kripto terdesentralisasi
+            pertama di Indonesia yang mengutamakan anonimitas dan keamanan<br />
+            pengguna. Menggunakan teknologi Internet Computer Protocol (ICP)
+            yang dapat melindungi identitas kamu tanpa perlu <br />
+            verifikasi KYC, NusacoinX memungkinkan kamu untuk trading berbagai
+            jenis token, mulai dari Bitcoin hingga<br />
+            memecoin favorit kamu, secara instan dan tanpa hambatan.
+          </span>
+        </div>
       </div>
     </div>
-    <div class="w-100 h-100 container-center-top pt-5 text-white" id="hero3">
+    <div class="w-100 container-center-top pt-5 text-white" id="hero3" style="min-height: 100vh;">
       <div class="item-center text-center">
         <h2 class="pt-3 w-100">Attractive Features</h2>
         <span>Why choose NusacoinX?</span>
         <div class="w-100 mt-3 d-flex mt-3 justify-content-center">
           <div class="row w-50">
             <div class="col-sm card-main card text-white m-2">
-              <div class="card-header">NO KYC REQUIRED</div>
+              <div class="card-header">NO KYC VERIFICATION</div>
               <div
                 class="card-body bg-none"
                 style="background-color: transparent">
-                Trading all types of tokens from bitcoin to your memecoin<br />instantly
-                without ID Card verification
+                No need for tedious KYC processes<br />ensuring your privacy and
+                anonymity
               </div>
             </div>
             <div class="col-sm card-main card text-white m-2">
-              <div class="card-header">ICP AUTHENTICATION</div>
+              <div class="card-header text-small">ICP AUTHENTICATION</div>
               <div
                 class="card-body bg-none"
                 style="background-color: transparent">
-                Trading all types of tokens from bitcoin to your memecoin<br />instantly
-                without ID Card verification
+                Using Internet Computer Protocol (ICP) technology to ensure<br />secure
+                and anonymous transactions
               </div>
             </div>
             <div class="col-sm card-main card text-white m-2">
-              <div class="card-header">DEC. STAKEHOLDER</div>
+              <div class="card-header">DECENTRALIZED STAKEHOLDER</div>
               <div
                 class="card-body bg-none"
                 style="background-color: transparent">
@@ -124,8 +143,8 @@
               <div
                 class="card-body bg-none"
                 style="background-color: transparent">
-                Trading all types of tokens from bitcoin to your memecoin<br />instantly
-                without ID Card verification
+                AI-powered recommendations to help you make<br />informed
+                trading decisions
               </div>
             </div>
             <div class="col-sm card-main card text-white m-2">
@@ -133,35 +152,57 @@
               <div
                 class="card-body bg-none"
                 style="background-color: transparent">
-                Trading all types of tokens from bitcoin to your memecoin<br />instantly
-                without ID Card verification
+                Instant withdrawals to your wallet<br />whenever you need it
               </div>
             </div>
             <div class="col-sm card-main card text-white m-2">
-              <div class="card-header">24/7 SUPPORT TEAM</div>
+              <div class="card-header">24/7 <br />SUPPORT CENTER</div>
               <div
                 class="card-body bg-none"
                 style="background-color: transparent">
-                Trading all types of tokens from bitcoin to your memecoin<br />instantly
-                without ID Card verification
+                Dedicated support team available<br />around the clock to assist
+                you
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="w-100 h-100 container-center-top pt-5 text-white" id="hero4">
+    <div class="w-100 h-100 container-center pt-2 text-white" id="hero4">
       <div class="item-center text-center">
-        <h2 class="pt-3 w-100">Contact Us</h2>
-        <span>
+        <h2 class="mb-3 w-100">Contact Us</h2>
+        <span class="mb-5">
           Have questions or need assistance? Our support team is here to
           help!<br />
           Reach out to us anytime, and we'll ensure your experience with
           NusacoinX is smooth and secure.
         </span>
+        <div class="mt-5">
+          <div class="row w-100 mt-4 mx-auto">
+            <div class="col-md-6 text-start">
+              <h6><i class="bi bi-envelope"></i> contact@nusacoinx.com</h6>
+            </div>
+            <div class="col-md-6 text-start">
+              <h6><i class="bi bi-telephone"></i> 085121081664 (Azhar)</h6>
+            </div>
+          </div>
+          <div class="row w-100 mt-4 mx-auto">
+            <div class="col-md-6 text-start">
+              <h6>
+                <i class="bi bi-house"></i> Jl. Melati Indah No. 109, RT 05/RW
+                01
+              </h6>
+            </div>
+            <div class="col-md-6 text-start">
+              <h6><i class="bi bi-browser-chrome"></i> www.nusacoinx.com</h6>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+
     <script>
+
       gsap.registerPlugin(ScrollTrigger, ScrambleTextPlugin);
       ///////
       VANTA.GLOBE({
@@ -379,9 +420,6 @@
           });
       });
     </script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-      crossorigin="anonymous"></script>
+  
   </body>
 </html>
