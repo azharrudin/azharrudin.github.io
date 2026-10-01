@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Neural Network Playground JS</title>
+<style>
+:root{
+  --bg:#0b1020; --panel:#121a2e; --panel2:#18233d; --text:#eef4ff;
+  --muted:#9fb0cf; --line:#344563; --accent:#6ea8fe; --good:#7ee787;
+  --warn:#ffd166; --bad:#ff7b72;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+header{padding:18px 22px;border-bottom:1px solid #26334e;background:#0e1528;position:sticky;top:0;z-index:5}
+header h1{margin:0;font-size:20px} header p{margin:5px 0 0;color:var(--muted);font-size:13px}
+.app{display:grid;grid-template-columns:360px 1fr;min-height:calc(100vh - 75px)}
+.sidebar{padding:16px;border-right:1px solid #26334e;background:#0d1426;overflow:auto}
+.main{padding:16px;overflow:auto}
+.card{background:var(--panel);border:1px solid #253453;border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:0 8px 24px #0003}
+.card h2{font-size:14px;margin:0 0 10px}
+label{display:block;font-size:12px;color:var(--muted);margin:9px 0 5px}
+textarea,input,select,button{font:inherit}
+textarea,input,select{width:100%;background:#0a1120;color:var(--text);border:1px solid #31415f;border-radius:9px;padding:9px}
+textarea{min-height:190px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button{border:0;border-radius:9px;padding:9px 12px;cursor:pointer;background:#263552;color:white}
+button.primary{background:var(--accent);color:#07101f;font-weight:700}
+button.good{background:var(--good);color:#08150a;font-weight:700}
+button.warn{background:var(--warn);color:#201800;font-weight:700}
+button.bad{background:var(--bad);color:#230604;font-weight:700}
+button:disabled{opacity:.45;cursor:not-allowed}
+.buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.small{font-size:11px;color:var(--muted);line-height:1.5}
+.status{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;white-space:pre-wrap;background:#08101d;border-radius:9px;padding:10px;max-height:210px;overflow:auto}
+.math-step{border-left:3px solid var(--accent);padding:10px;margin:10px 0;background:#08101d;border-radius:6px}
+.math-step.backward{border-color:var(--bad)}
+.math-body{font-size:13px;line-height:1.8;margin-top:8px}
+.math-line{overflow-x:auto;padding:6px 0}
+#mathSteps{max-height:420px;overflow:auto}
+#networkWrap{background:radial-gradient(circle at center,#131d34,#090f1d);border:1px solid #253453;border-radius:14px;min-height:560px;position:relative;overflow:auto}
+svg{display:block;width:100%;height:560px;min-width:760px}
+.edge{stroke:#516480;stroke-width:1.2;opacity:.38;transition:.2s}
+.edge.active-forward{stroke:var(--accent);stroke-width:3;opacity:1}
+.edge.active-backward{stroke:var(--bad);stroke-width:3;opacity:1}
+.edge.positive{stroke:#65c97a}
+.edge.negative{stroke:#d96d6d}
+.node circle{fill:#17223b;stroke:#6c7f9f;stroke-width:2;transition:.2s}
+.node text{fill:white;font-size:11px;text-anchor:middle;pointer-events:none}
+.node .val{fill:#bcd0f5;font-size:10px}
+.node.active-forward circle{fill:#19406d;stroke:#79b8ff;stroke-width:4}
+.node.active-backward circle{fill:#5b2028;stroke:#ff8a80;stroke-width:4}
+.node.input circle{fill:#17324e}.node.output circle{fill:#332b51}
+.legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin:10px 2px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:10px;margin-bottom:14px}
+.metric{background:var(--panel);border:1px solid #253453;border-radius:12px;padding:12px}
+.metric b{display:block;font-size:20px;margin-top:4px}
+.metric span{color:var(--muted);font-size:11px}
+.rangeLine{display:grid;grid-template-columns:1fr 70px;gap:8px;align-items:center}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{padding:7px;border-bottom:1px solid #26334e;text-align:right}
+th:first-child,td:first-child{text-align:left}
+@media(max-width:980px){.app{grid-template-columns:1fr}.sidebar{border-right:0;border-bottom:1px solid #26334e}.metrics{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Neural Network Playground — JavaScript</h1>
+  <p>CSV custom · arsitektur dinamis · forward/backpropagation animation · training & prediction</p>
+</header>
+<div class="app">
+  <aside class="sidebar">
+
+    <div class="card">
+      <h2>1. Data CSV</h2>
+      <textarea id="csv">temperature,humidity,pressure,wind_speed,rain
+32,62,1011,8,0
+31,68,1009,10,0
+29,78,1007,12,1
+28,85,1005,15,1
+30,74,1008,9,1
+33,58,1012,7,0
+27,88,1004,18,1
+31,65,1010,11,0
+29,81,1006,14,1
+34,55,1013,6,0</textarea>
+      <p class="small">Contoh data cuaca: temperature, humidity, pressure, dan wind_speed sebagai input; rain sebagai target (0 = tidak hujan, 1 = hujan).</p>
+      <label>Target column</label>
+      <select id="targetCol"></select>
+      <div class="buttons">
+        <button id="parseBtn" class="primary">Parse CSV</button>
+      </div>
+      <div id="dataInfo" class="small"></div>
+    </div>
+
+    <div class="card">
+      <h2>2. Arsitektur</h2>
+      <label>Hidden layers</label>
+      <input id="hiddenLayers" value="4,4" placeholder="contoh: 4,4 atau 8,6,4">
+      <label>Activation hidden</label>
+      <select id="hiddenAct">
+        <option value="sigmoid">Sigmoid</option>
+        <option value="tanh">Tanh</option>
+        <option value="relu">ReLU</option>
+      </select>
+      <label>Activation output</label>
+      <select id="outputAct">
+        <option value="sigmoid">Sigmoid</option>
+        <option value="linear">Linear</option>
+      </select>
+      <div class="row">
+        <div>
+          <label>Learning rate</label>
+          <input id="lr" type="number" min="0.0001" step="0.01" value="0.3">
+        </div>
+        <div>
+          <label>Epoch</label>
+          <input id="epochs" type="number" min="1" step="100" value="3000">
+        </div>
+      </div>
+      <div class="buttons">
+        <button id="buildBtn" class="good">Build Network</button>
+        <button id="randomBtn">Randomize</button>
+      </div>
+      <p class="small">Jumlah input mengikuti kolom CSV selain target. Output = 1 neuron untuk contoh ini.</p>
+    </div>
+
+    <div class="card">
+      <h2>3. Simulasi Training</h2>
+      <p class="small">Gunakan sample CSV untuk forward, backward, dan memperbarui bobot.</p>
+      <label>Sample training</label>
+      <select id="sampleSel"></select>
+      <div class="rangeLine">
+        <div>
+          <label>Animation speed</label>
+          <input id="speed" type="range" min="100" max="1400" step="100" value="500">
+        </div>
+        <input id="speedVal" value="500 ms" readonly>
+      </div>
+      <div class="buttons">
+        <button id="forwardBtn" class="primary">▶ Forward</button>
+        <button id="backwardBtn" class="bad">↶ Backward</button>
+        <button id="stepBtn" class="warn">Train 1 Step</button>
+      </div>
+      <div class="buttons">
+        <button id="trainBtn" class="good">Train All</button>
+        <button id="stopBtn">Stop</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>4. Predict · Input User</h2>
+      <p class="small">Masukkan nilai fitur asli. Normalisasi memakai rentang data training; prediksi memakai bobot jaringan saat ini.</p>
+      <div id="predictInputs"></div>
+      <div class="buttons"><button id="predictBtn" class="primary">▶ Predict</button></div>
+      <div id="predictResult" class="status" role="status">Belum ada prediksi input user.</div>
+    </div>
+
+    <div class="card">
+      <h2>Status</h2>
+      <div id="status" class="status">Belum ada network.</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="metrics">
+      <div class="metric"><span>Input neurons</span><b id="mInputs">-</b></div>
+      <div class="metric"><span>Hidden neurons</span><b id="mHidden">-</b></div>
+      <div class="metric"><span>Current loss</span><b id="mLoss">-</b></div>
+      <div class="metric"><span>Output simulasi</span><b id="mPred">-</b></div>
+    </div>
+
+    <div id="networkWrap">
+      <svg id="network" viewBox="0 0 1000 560"></svg>
+    </div>
+    <div class="legend">
+      <span><span class="dot" style="background:#6ea8fe"></span>Forward propagation</span>
+      <span><span class="dot" style="background:#ff7b72"></span>Backward propagation / gradient</span>
+      <span><span class="dot" style="background:#65c97a"></span>Positive weight</span>
+      <span><span class="dot" style="background:#d96d6d"></span>Negative weight</span>
+    </div>
+
+    <div class="card">
+      <h2>Rumus yang Dipakai</h2>
+      <div class="small">
+        <p>Model memakai neural network feedforward (fully connected). Arsitektur default adalah 4 input → 4 neuron hidden → 4 neuron hidden → 1 output. Setiap neuron menerima semua output dari layer sebelumnya.</p>
+        <p><b>Normalisasi min–max:</b> x_normal = (x − min_training) / (max_training − min_training). Jika min = max, nilainya menjadi 0. Input prediksi memakai min dan max yang sama dari data training.</p>
+        <p><b>Forward:</b> z = Σ(w × a_sebelumnya) + b, lalu a = f(z). w adalah bobot, b adalah bias, dan a adalah aktivasi neuron.</p>
+        <p><b>Fungsi aktivasi:</b> sigmoid(z) = 1 / (1 + exp(−z)) dengan turunan a × (1 − a); tanh(z) dengan turunan 1 − a²; ReLU(z) = max(0, z) dengan turunan 1 jika z &gt; 0, selain itu 0; linear(z) = z dengan turunan 1. Default hidden dan output memakai sigmoid.</p>
+        <p><b>Loss per sample:</b> L = ½ × (ŷ − y)², yaitu setengah squared error. ŷ adalah prediksi dan y adalah target asli. Average loss saat Train All adalah rata-rata loss semua sample.</p>
+        <p><b>Backward (chain rule):</b> delta output δ = (ŷ − y) × f′(z). Delta hidden δ = Σ(w_layer_berikutnya × δ_layer_berikutnya) × f′(z). Gradien bobot ∂L/∂w = δ × a_sebelumnya; gradien bias ∂L/∂b = δ.</p>
+        <p><b>Update dengan stochastic gradient descent:</b> w_baru = w − η × ∂L/∂w dan b_baru = b − η × δ. η adalah learning rate. Train 1 Step memperbarui bobot untuk satu sample; Train All memperbarui bobot per sample, berulang sesuai jumlah epoch. Tombol Backward hanya menampilkan gradien.</p>
+        <p><b>Predict:</b> hanya normalisasi dan forward dengan bobot saat ini. Tidak membutuhkan target, tidak menghitung loss, dan tidak memperbarui bobot. Untuk target rain dengan output sigmoid, hasil mendekati 0 mengarah ke tidak hujan dan mendekati 1 mengarah ke hujan.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Live Math Process</h2>
+      <p class="small">Perhitungan mengikuti layer yang menyala. a = aktivasi, z = weighted sum, δ = gradien terhadap z. Angka ditampilkan hingga 6 desimal.</p>
+      <div id="mathSteps" aria-live="polite">Klik Forward, Backward, atau Train 1 Step untuk melihat proses matematika.</div>
+    </div>
+
+    <div class="card">
+      <h2>Sample Data & Prediction</h2>
+      <div id="preview"></div>
+    </div>
+  </main>
+</div>
+
+<script src="./nnplay.js"></script>
+<script async id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</body>
+</html>
