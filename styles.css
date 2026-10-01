@@ -62,7 +62,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .menu-toggle span { display: block; height: 2px; background: var(--text); margin: 5px 0; border-radius: 2px; }
 
 .hero { min-height: calc(100vh - 74px); display: grid; align-items: center; padding-top: 74px; }
-.hero-grid { display: grid; grid-template-columns: 1.12fr .88fr; gap: 80px; align-items: center; }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; }
+.hero-copy { width: 100%; max-width: 960px; }
 .eyebrow { margin: 0 0 14px; color: var(--accent); font-size: .77rem; font-weight: 900; letter-spacing: .18em; }
 .hero h1, .section-heading h2, .contact-panel h2 { margin: 0; line-height: 1.02; letter-spacing: -.055em; }
 .hero h1 { font-size: clamp(3.3rem, 7vw, 6.6rem); max-width: 900px; }
