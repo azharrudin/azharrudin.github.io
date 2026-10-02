@@ -31,28 +31,263 @@ function mathTex(line){
     .replace(/\brelu\b/g, '\\operatorname{ReLU}').replace(/\bmax\b/g, '\\max')
     .replace(/\bexp\b/g, '\\exp').replace(/\bb\b/g, 'b');
 }
-async function mathStep(title, lines, backward=false){
-  const card=document.createElement("div");
-  card.className="math-step"+(backward?" backward":"");
-  const heading=document.createElement("strong"), body=document.createElement("div");
-  body.className="math-body";
-  heading.textContent=title;
-  lines.filter(Boolean).forEach(line=>{
-    const row=document.createElement("div");
-    row.className="math-line";
-    let prefix="";
-    if(line.startsWith("Neuron ")){
-      const colon=line.indexOf(":");
-      prefix=line.slice(0,colon+1)+" ";
-      line=line.slice(colon+1).trim();
-    }
-    if(line.startsWith("Learning rate ")){prefix="Learning rate ";line=line.slice(prefix.length)}
-    // Descriptions remain readable text; only equations are sent to TeX.
-    row.textContent=prefix+(line.includes("=")&&!line.startsWith("Bobot")&&!line.startsWith("x")
-      ? `\\(${mathTex(line)}\\)` : line);
-    body.appendChild(row);
+
+function valueNumber(value){
+  return value!==null && value!==undefined && Number.isFinite(Number(value)) ? fmt(value) : "—";
+}
+function valueVector(values,labels=[]){
+  if(!Array.isArray(values)) return "—";
+  const limit=10;
+  const items=values.slice(0,limit).map((value,index)=>
+    `${labels[index] || index+1}=${valueNumber(value)}`);
+  if(values.length>limit) items.push(`… +${values.length-limit} nilai`);
+  return items.join("\n");
+}
+function valueMatrix(matrix){
+  if(!Array.isArray(matrix)) return "—";
+  const rowLimit=6, columnLimit=8;
+  const rows=matrix.slice(0,rowLimit).map((row,index)=>{
+    const values=row.slice(0,columnLimit).map(valueNumber).join(", ");
+    return `neuron ${index+1}: [${values}${row.length>columnLimit?", …":""}]`;
   });
+  if(matrix.length>rowLimit) rows.push(`… +${matrix.length-rowLimit} neuron`);
+  return rows.join("\n");
+}
+function valueLayers(layers){
+  if(!Array.isArray(layers)) return "—";
+  return layers.map((layer,index)=>`Layer ${index+1}\n${Array.isArray(layer[0])?valueMatrix(layer):valueVector(layer)}`).join("\n");
+}
+function weightRows(matrix,layer,previousLabels=[],source="Parameter network saat ini",variant=""){
+  if(!Array.isArray(matrix)) return [];
+  return matrix.flatMap((row,j)=>row.map((value,i)=>{
+    const from=previousLabels[i]
+      ? `fitur “${previousLabels[i]}” (a${i+1} layer ${layer-1})`
+      : `neuron ${i+1} layer ${layer-1}`;
+    const symbol=variant
+      ? String.raw`\(w_{\mathrm{${variant}},${j+1},${i+1}}^{(${layer})}\)`
+      : String.raw`\(w_{${j+1},${i+1}}^{(${layer})}\)`;
+    return [symbol,valueNumber(value),`${source}; bobot koneksi dari ${from} menuju neuron ${j+1} layer ${layer}.`];
+  }));
+}
+function biasRows(values,layer,source="Parameter network saat ini",variant=""){
+  if(!Array.isArray(values)) return [];
+  return values.map((value,j)=>{
+    const symbol=variant
+      ? String.raw`\(b_{\mathrm{${variant}},${j+1}}^{(${layer})}\)`
+      : String.raw`\(b_{${j+1}}^{(${layer})}\)`;
+    return [symbol,valueNumber(value),`${source}; bias milik neuron ${j+1} layer ${layer}, bukan berasal dari neuron layer sebelumnya.`];
+  });
+}
+function networkParameterRows(weights,biases,featureNames,source,variant=""){
+  if(!Array.isArray(weights) || !Array.isArray(biases)) return [];
+  return weights.flatMap((matrix,index)=>[
+    ...weightRows(matrix,index+1,index===0?featureNames:[],source,variant),
+    ...biasRows(biases[index],index+1,source,variant)
+  ]);
+}
+
+function variableGuide(title,context={}){
+  if(title.startsWith("Training · Row") || title==="Predict · Input User"){
+    const source=context.inputSource || (title.startsWith("Training") ? "baris CSV yang dipilih" : "form Predict · Input User");
+    return {
+      intro:"Tahap ini mengubah input asli ke skala 0–1 sebelum masuk ke network.",
+      variables:[
+        [String.raw`\(x_i\)`, valueVector(context.raw,context.featureNames), `Nilai fitur ke-i dari ${source}.`],
+        [String.raw`\(\min_i\)`, valueVector(context.mins,context.minLabels || context.featureNames), "Nilai minimum tiap fitur dari seluruh baris CSV training saat data diparse."],
+        [String.raw`\(\max_i\)`, valueVector(context.maxs,context.maxLabels || context.featureNames), "Nilai maksimum tiap fitur dari seluruh baris CSV training saat data diparse."],
+        [String.raw`\(a_i^{(0)}\)`, valueVector(context.normalized,context.featureNames), "Hasil normalisasi min–max dari xᵢ. Nilai ini menjadi input layer pertama."],
+        [String.raw`\(i\)`, (context.featureNames || []).map((name,index)=>`${index+1} = ${name}`).join("\n") || "—", "Indeks fitur mengikuti urutan kolom CSV selain kolom target."]
+      ]
+    };
+  }
+
+  if(title.startsWith("Forward · Layer")){
+    const layer=Number(title.match(/Layer (\d+)/)?.[1] || 1);
+    return {
+      intro:`Tahap forward layer ${layer} menghitung weighted sum, lalu melewatkannya ke fungsi aktivasi.`,
+      variables:[
+        [String.raw`\(a_i^{(${layer-1})}\)`, valueVector(context.aPrev,context.previousLabels), layer===1 ? "Input hasil normalisasi CSV/input user." : `Nilai a dari hasil forward layer ${layer-1}.`],
+        ...weightRows(context.weights,layer,context.previousLabels,context.parameterSource),
+        ...biasRows(context.biases,layer,context.parameterSource),
+        [String.raw`\(z_j^{(${layer})}\)`, valueVector(context.z), "Hasil Σ(w × a sebelumnya) + b pada proses ini."],
+        [String.raw`\(f\)`, context.activation || "—", layer===context.outputLayer ? "Pilihan Activation output di sidebar." : "Pilihan Activation hidden di sidebar."],
+        [String.raw`\(a_j^{(${layer})}\)`, valueVector(context.a), layer===context.outputLayer ? "Hasil f(z) dan menjadi prediksi akhir network." : `Hasil f(z); nilai ini menjadi input layer ${layer+1}.`]
+      ]
+    };
+  }
+
+  if(title==="Loss"){
+    return {
+      intro:"Loss mengukur jarak antara prediksi network dan target pada sample yang dipilih.",
+      variables:[
+        [String.raw`\(\hat y\)`, valueVector(context.pred), "Aktivasi neuron output dari forward propagation."],
+        [String.raw`\(y\)`, valueVector(context.target), `Nilai kolom “${context.targetName || "target"}” dari ${context.targetSource || "baris CSV yang dipilih"}.`],
+        [String.raw`\(L\)`, valueNumber(context.loss), "Hasil ½(ŷ − y)² untuk sample ini."]
+      ]
+    };
+  }
+
+  if(title.startsWith("Backward · Loss awal")){
+    return {
+      intro:"Nilai awal ini menjadi dasar perhitungan gradien sebelum bobot diperbarui.",
+      variables:[
+        [String.raw`\(\hat y\)`, valueVector(context.pred), "Prediksi terbaru dari forward propagation untuk sample yang dipilih."],
+        [String.raw`\(y\)`, valueVector(context.target), `Nilai kolom “${context.targetName || "target"}” dari ${context.targetSource || "baris CSV yang dipilih"}.`],
+        [String.raw`\(L\)`, valueNumber(context.loss), "Loss sample sebelum update bobot dan bias."],
+        [String.raw`\(\eta\)`, valueNumber(context.lr), "Nilai kontrol Learning rate di sidebar."]
+      ]
+    };
+  }
+
+  if(title.startsWith("Backward · Layer")){
+    const layer=Number(title.match(/Layer (\d+)/)?.[1] || 1);
+    const outputLayer=layer===context.outputLayer;
+    const variables=[
+      [String.raw`\(f'(z)\)`, valueVector(context.derivatives), `Turunan aktivasi ${context.activation || ""} menggunakan z dan a yang tersimpan saat forward.`],
+      [String.raw`\(\delta_j^{(${layer})}\)`, valueVector(context.delta), outputLayer ? "Dari (ŷ − y) × f′(z)." : "Dari jumlah w layer berikutnya × delta layer berikutnya, lalu dikali f′(z)."],
+      [String.raw`\(a_i^{(${layer-1})}\)`, valueVector(context.aPrev,context.previousLabels), layer===1 ? "Input network hasil normalisasi." : `Aktivasi hasil forward layer ${layer-1}.`],
+      [String.raw`\(\partial L/\partial w\)`, valueMatrix(context.gradsW), "Dari δ × aktivasi layer sebelumnya."],
+      [String.raw`\(\partial L/\partial b\)`, valueVector(context.gradsB), "Nilainya sama dengan delta neuron pada layer ini."]
+    ];
+    if(outputLayer){
+      variables.splice(1,0,
+        [String.raw`\(\hat y\)`, valueVector(context.pred), "Aktivasi output yang tersimpan dari forward propagation."],
+        [String.raw`\(y\)`, valueVector(context.target), `Nilai kolom “${context.targetName || "target"}” dari ${context.targetSource || "baris CSV yang dipilih"}.`]);
+    }else{
+      variables.splice(1,0,
+        ...weightRows(context.nextWeights,layer+1,[],`${context.parameterSource}; dipakai untuk membawa error kembali ke layer ${layer}`),
+        [String.raw`\(\delta_k^{(${layer+1})}\)`, valueVector(context.nextDelta), `Delta yang sebelumnya sudah dihitung pada layer ${layer+1}.`]);
+    }
+    if(title.includes("update setelah animasi")){
+      variables.push(
+        ...weightRows(context.weights,layer,context.previousLabels,`${context.parameterSource}; nilai sebelum update ini`,"lama"),
+        ...biasRows(context.biases,layer,`${context.parameterSource}; nilai sebelum update ini`,"lama"),
+        [String.raw`\(\eta\)`, valueNumber(context.lr), "Nilai kontrol Learning rate di sidebar."],
+        ...weightRows(context.updatedWeights,layer,context.previousLabels,"Hasil w_lama pada koneksi yang sama − η × gradiennya","baru"),
+        ...biasRows(context.updatedBiases,layer,"Hasil b_lama neuron yang sama − η × gradiennya","baru")
+      );
+    }
+    return {intro:`Tahap backward layer ${layer} menerapkan chain rule dari output menuju input.`,variables};
+  }
+
+  if(title==="Hasil Predict"){
+    return {
+      intro:"Hasil ini hanya berasal dari normalisasi dan forward propagation; bobot tidak diubah.",
+      variables:[
+        [String.raw`\(\hat y\)`, valueVector(context.pred), "Aktivasi neuron output terakhir dari forward propagation."],
+        ...networkParameterRows(context.weights,context.biases,context.featureNames,context.parameterSource)
+      ]
+    };
+  }
+
+  if(title==="Gradien selesai"){
+    return {
+      intro:"Backward selesai menghitung gradien untuk diperiksa, tetapi bobot dan bias belum diperbarui.",
+      variables:[
+        [String.raw`\(\partial L/\partial w\)`, context.gradientSummary || "Lihat detail substitusi", "Gradien bobot hasil chain rule dari output menuju input."],
+        [String.raw`\(\partial L/\partial b\)`, context.biasGradientSummary || "Lihat detail substitusi", "Gradien bias hasil chain rule."],
+        ...networkParameterRows(context.weights,context.biases,context.featureNames,"Tidak berubah karena tombol Backward hanya menampilkan gradien"),
+        [String.raw`\(L\)`, valueNumber(context.loss), "Loss dihitung dengan parameter yang belum diubah."]
+      ]
+    };
+  }
+
+  return {
+    intro:"Update selesai menerapkan gradien ke parameter network, lalu menghitung ulang loss.",
+    variables:[
+      ...networkParameterRows(context.weights,context.biases,context.featureNames,"Hasil parameter lama − η × gradien masing-masing","baru"),
+      [String.raw`\(\eta\)`, valueNumber(context.lr), "Nilai kontrol Learning rate di sidebar."],
+      [String.raw`\(L\)`, valueNumber(context.loss), "Loss yang dihitung ulang sesudah update parameter."]
+    ]
+  };
+}
+
+function createMathLine(line){
+  const row=document.createElement("div");
+  row.className="math-line";
+  let prefix="";
+  if(line.startsWith("Neuron ")){
+    const colon=line.indexOf(":");
+    prefix=line.slice(0,colon+1)+" ";
+    line=line.slice(colon+1).trim();
+  }
+  if(line.startsWith("Learning rate ")){
+    prefix="Learning rate ";
+    line=line.slice(prefix.length);
+  }
+  // Descriptions remain readable text; only equations are sent to TeX.
+  row.textContent=prefix+(line.includes("=")&&!line.startsWith("Bobot")&&!line.startsWith("x")
+    ? `\\(${mathTex(line)}\\)` : line);
+  return row;
+}
+
+async function openVariableDialog(processTitle, processLines, processContext){
+  const dialog=$("#variableDialog");
+  const dialogBody=dialog.querySelector(".dialog-body");
+  const sources=$("#variableSources");
+  const values=$("#variableValues");
+  const guide=variableGuide(processTitle,processContext);
+  window.MathJax?.typesetClear?.([dialogBody]);
+  $("#variableDialogTitle").textContent=`Detail Variabel · ${processTitle}`;
+  $("#variableDialogIntro").textContent=guide.intro;
+  sources.replaceChildren();
+  values.replaceChildren();
+  ["Variabel","Nilai","Asal nilai"].forEach(label=>{
+    const heading=document.createElement("div");
+    heading.className="variable-heading";
+    heading.textContent=label;
+    sources.appendChild(heading);
+  });
+  guide.variables.forEach(([symbol,value,origin])=>{
+    const symbolEl=document.createElement("div");
+    const valueEl=document.createElement("div");
+    const originEl=document.createElement("div");
+    symbolEl.className="variable-symbol";
+    valueEl.className="variable-value";
+    originEl.className="variable-origin";
+    symbolEl.textContent=symbol;
+    valueEl.textContent=value;
+    originEl.textContent=origin;
+    sources.append(symbolEl,valueEl,originEl);
+  });
+  processLines.filter(Boolean).forEach(line=>values.appendChild(createMathLine(line)));
+  if(typeof dialog.showModal==="function") dialog.showModal();
+  else dialog.setAttribute("open","");
+  try{
+    if(window.MathJax?.typesetPromise){
+      await window.MathJax.startup.promise;
+      if(dialog.open) await window.MathJax.typesetPromise([dialogBody]);
+    }
+  }catch(error){console.warn("MathJax popup rendering failed:",error)}
+}
+
+async function mathStep(title, lines, backward=false, context={}){
+  const processContext=typeof structuredClone==="function"
+    ? structuredClone(context)
+    : JSON.parse(JSON.stringify(context));
+  const card=document.createElement("div");
+  card.className="math-step interactive"+(backward?" backward":"");
+  card.tabIndex=0;
+  card.setAttribute("role","button");
+  card.setAttribute("aria-haspopup","dialog");
+  card.setAttribute("aria-label",`${title}. Buka penjelasan asal dan nilai variabel.`);
+  const heading=document.createElement("strong"), body=document.createElement("div");
+  const hint=document.createElement("span");
+  body.className="math-body";
+  hint.className="math-step-hint";
+  heading.textContent=title;
+  hint.textContent="Klik untuk melihat asal dan nilai variabel";
+  heading.appendChild(hint);
+  lines.filter(Boolean).forEach(line=>body.appendChild(createMathLine(line)));
   card.append(heading,body);
+  const processLines=lines.slice();
+  card.addEventListener("click",()=>openVariableDialog(title,processLines,processContext));
+  card.addEventListener("keydown",event=>{
+    if(event.key==="Enter" || event.key===" "){
+      event.preventDefault();
+      openVariableDialog(title,processLines,processContext);
+    }
+  });
   const panel=$("#mathSteps");
   panel.appendChild(card);
   try{
@@ -63,6 +298,11 @@ async function mathStep(title, lines, backward=false){
   }catch(error){console.warn("MathJax rendering failed:",error)}
   panel.scrollTop=panel.scrollHeight;
 }
+
+$("#variableDialogClose").addEventListener("click",()=>$("#variableDialog").close());
+$("#variableDialog").addEventListener("click",event=>{
+  if(event.target===$("#variableDialog")) $("#variableDialog").close();
+});
 function activationMath(type,z,a,derivative=false){
   if(derivative){
     if(type==="sigmoid") return `${fmt(a)} × (1 − ${fmt(a)})`;
@@ -75,6 +315,11 @@ function activationMath(type,z,a,derivative=false){
   if(type==="relu") return `max(0, ${fmt(z)})`;
   return fmt(z);
 }
+function parameterSource(){
+  return nn.updateCount===0
+    ? "Inisialisasi acak saat Build Network/Randomize"
+    : `Hasil update SGD sebelumnya (${nn.updateCount} langkah update)`;
+}
 function forwardMath(l){
   const {A,Z}=nn.cache;
   const type=l===nn.W.length-1?nn.outputAct:nn.hiddenAct;
@@ -84,7 +329,17 @@ function forwardMath(l){
       `z = ${row.map((w,i)=>`(${fmt(w)} × ${fmt(A[l][i])})`).join(" + ")} + (${fmt(nn.B[l][j])}) = ${fmt(Z[l][j])}`,
       `a = ${type}(z) = ${activationMath(type,Z[l][j],A[l+1][j])} = ${fmt(A[l+1][j])}`, "");
   });
-  return mathStep(`Forward · Layer ${l+1}`,lines);
+  return mathStep(`Forward · Layer ${l+1}`,lines,false,{
+    aPrev:A[l],
+    previousLabels:l===0?dataset.featureNames:[],
+    weights:nn.W[l],
+    biases:nn.B[l],
+    z:Z[l],
+    a:A[l+1],
+    activation:type,
+    parameterSource:parameterSource(),
+    outputLayer:nn.W.length
+  });
 }
 function backwardMath(l,y,grads,apply){
   const {A,Z}=nn.cache;
@@ -107,7 +362,30 @@ function backwardMath(l,y,grads,apply){
     if(apply) lines.push(`b_new = ${fmt(nn.B[l][j])} − ${fmt(nn.lr)} × (${fmt(grads.gradsB[l][j])}) = ${fmt(nn.B[l][j]-nn.lr*grads.gradsB[l][j])}`);
     lines.push("");
   });
-  return mathStep(`Backward · Layer ${l+1}${apply?" · update setelah animasi":" · tanpa update"}`,lines,true);
+  return mathStep(`Backward · Layer ${l+1}${apply?" · update setelah animasi":" · tanpa update"}`,lines,true,{
+    z:Z[l],
+    a:A[l+1],
+    aPrev:A[l],
+    previousLabels:l===0?dataset.featureNames:[],
+    derivatives:Z[l].map((z,j)=>dAct(type,z,A[l+1][j])),
+    delta:grads.deltas[l],
+    gradsW:grads.gradsW[l],
+    gradsB:grads.gradsB[l],
+    weights:nn.W[l],
+    biases:nn.B[l],
+    updatedWeights:nn.W[l].map((row,j)=>row.map((weight,i)=>weight-nn.lr*grads.gradsW[l][j][i])),
+    updatedBiases:nn.B[l].map((bias,j)=>bias-nn.lr*grads.gradsB[l][j]),
+    nextWeights:output?null:nn.W[l+1],
+    nextDelta:output?null:grads.deltas[l+1],
+    pred:A.at(-1),
+    target:y,
+    targetName:dataset.targetName,
+    targetSource:`CSV row ${Number($("#sampleSel").value || 0)+1}`,
+    activation:type,
+    parameterSource:parameterSource(),
+    lr:nn.lr,
+    outputLayer:nn.W.length
+  });
 }
 
 async function runSimulation(action){
@@ -253,6 +531,7 @@ class NeuralNetwork{
     this.lr=lr;
     this.W=[];
     this.B=[];
+    this.updateCount=0;
     for(let l=0;l<sizes.length-1;l++){
       this.W.push(Array.from({length:sizes[l+1]},()=>Array.from({length:sizes[l]},rand)));
       this.B.push(Array.from({length:sizes[l+1]},()=>rand()));
@@ -305,6 +584,7 @@ class NeuralNetwork{
           this.B[l][j]-=this.lr*gradsB[l][j];
         }
       }
+      this.updateCount++;
     }
     return {deltas,gradsW,gradsB};
   }
@@ -417,7 +697,16 @@ async function animateForward(userInput=null){
   const speed=Number($("#speed").value);
   clearMath();
   await mathStep(predicting?"Predict · Input User":`Training · Row ${idx+1}`, x.map((v,i)=>
-    String.raw`a_{${i+1}}^{(0)} = ${dataset.maxs[i]===dataset.mins[i]?String.raw`0\;\text{(fitur konstan)}`:String.raw`\frac{${fmt(raw[i])} - ${fmt(dataset.mins[i])}}{${fmt(dataset.maxs[i])} - ${fmt(dataset.mins[i])}}`} = ${fmt(v)}`));
+    String.raw`a_{${i+1}}^{(0)} = ${dataset.maxs[i]===dataset.mins[i]?String.raw`0\;\text{(fitur konstan)}`:String.raw`\frac{${fmt(raw[i])} - ${fmt(dataset.mins[i])}}{${fmt(dataset.maxs[i])} - ${fmt(dataset.mins[i])}}`} = ${fmt(v)}`),false,{
+      raw,
+      normalized:x,
+      mins:dataset.mins,
+      maxs:dataset.maxs,
+      featureNames:dataset.featureNames,
+      minLabels:dataset.featureNames.map((name,i)=>`${name} (CSV row ${dataset.Xraw.findIndex(row=>row[i]===dataset.mins[i])+1})`),
+      maxLabels:dataset.featureNames.map((name,i)=>`${name} (CSV row ${dataset.Xraw.findIndex(row=>row[i]===dataset.maxs[i])+1})`),
+      inputSource:predicting ? "form Predict · Input User" : `CSV row ${idx+1}`
+    });
 
   nn.cache.A[0].forEach((v,n)=>setNodeValue(0,n,v));
 
@@ -434,14 +723,26 @@ async function animateForward(userInput=null){
     document.querySelectorAll(`#network .node.active-forward`).forEach(e=>e.classList.remove("active-forward"));
   }
   if(predicting){
-    await mathStep("Hasil Predict",[`ŷ = ${fmt(pred[0])}`,"Forward selesai. Bobot dan bias tetap."]);
+    await mathStep("Hasil Predict",[`ŷ = ${fmt(pred[0])}`,"Forward selesai. Bobot dan bias tetap."],false,{
+      pred,
+      weights:nn.W,
+      biases:nn.B,
+      featureNames:dataset.featureNames,
+      parameterSource:parameterSource()
+    });
     $("#mLoss").textContent="-";
     $("#mPred").textContent=pred[0].toFixed(4);
     setStatus(`PREDICT INPUT USER\nInput asli: [${raw.join(", ")}]\nInput normalisasi: [${x.map(fmt).join(", ")}]\nPrediction: ${fmt(pred[0])}`);
     return pred;
   }
   const loss=nn.loss(pred,y);
-  await mathStep("Loss",[`L = ½ × (ŷ − y)² = ½ × (${fmt(pred[0])} − ${fmt(y[0])})² = ${fmt(loss)}`]);
+  await mathStep("Loss",[`L = ½ × (ŷ − y)² = ½ × (${fmt(pred[0])} − ${fmt(y[0])})² = ${fmt(loss)}`],false,{
+    pred,
+    target:y,
+    targetName:dataset.targetName,
+    targetSource:`CSV row ${idx+1}`,
+    loss
+  });
   $("#mLoss").textContent=loss.toFixed(6);
   $("#mPred").textContent=pred[0].toFixed(4);
   setStatus(`FORWARD\nInput: [${x.map(v=>v.toFixed(3)).join(", ")}]\nPrediction: ${pred[0].toFixed(6)}\nTarget: ${y[0]}\nLoss: ${loss.toFixed(6)}`);
@@ -455,7 +756,16 @@ async function animateBackward(applyUpdate=true, keepMath=false){
   nn.lr=Number($("#lr").value);
   const grads=nn.backward(y,false);
   if(!keepMath) clearMath();
-  await mathStep("Backward · Loss awal",[`L = ½ × (${fmt(nn.cache.A.at(-1)[0])} − ${fmt(y[0])})² = ${fmt(nn.loss(nn.cache.A.at(-1),y))}`,`Learning rate η = ${fmt(nn.lr)}`],true);
+  const initialPred=nn.cache.A.at(-1);
+  const initialLoss=nn.loss(initialPred,y);
+  await mathStep("Backward · Loss awal",[`L = ½ × (${fmt(initialPred[0])} − ${fmt(y[0])})² = ${fmt(initialLoss)}`,`Learning rate η = ${fmt(nn.lr)}`],true,{
+    pred:initialPred,
+    target:y,
+    targetName:dataset.targetName,
+    targetSource:`CSV row ${idx+1}`,
+    loss:initialLoss,
+    lr:nn.lr
+  });
   const speed=Number($("#speed").value);
   clearActive();
 
@@ -477,7 +787,17 @@ async function animateBackward(applyUpdate=true, keepMath=false){
   nn.cache.A.forEach((layer,l)=>layer.forEach((v,n)=>setNodeValue(l,n,v)));
   const p=nn.cache.A.at(-1);
   const loss=nn.loss(p,y);
-  await mathStep(applyUpdate?"Update selesai":"Gradien selesai",[applyUpdate?`Bobot dan bias diperbarui. Loss setelah update = ${fmt(loss)}`:"Bobot dan bias tetap. Klik Train 1 Step untuk menerapkan gradien."],true);
+  await mathStep(applyUpdate?"Update selesai":"Gradien selesai",[applyUpdate?`Bobot dan bias diperbarui. Loss setelah update = ${fmt(loss)}`:"Bobot dan bias tetap. Klik Train 1 Step untuk menerapkan gradien."],true,{
+    gradientSummary:valueLayers(grads.gradsW),
+    biasGradientSummary:valueLayers(grads.gradsB),
+    weightSummary:valueLayers(nn.W),
+    biasSummary:valueLayers(nn.B),
+    weights:nn.W,
+    biases:nn.B,
+    featureNames:dataset.featureNames,
+    loss,
+    lr:nn.lr
+  });
   $("#mLoss").textContent=loss.toFixed(6);
   $("#mPred").textContent=p[0].toFixed(4);
   setStatus(`BACKPROPAGATION\nGradient dihitung dari output → input.\nWeights ${applyUpdate?"sudah":"belum"} diperbarui.\nLoss sekarang: ${loss.toFixed(6)}`);

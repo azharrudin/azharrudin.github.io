@@ -35,9 +35,42 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .status{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;white-space:pre-wrap;background:#08101d;border-radius:9px;padding:10px;max-height:210px;overflow:auto}
 .math-step{border-left:3px solid var(--accent);padding:10px;margin:10px 0;background:#08101d;border-radius:6px}
 .math-step.backward{border-color:var(--bad)}
+.math-step.interactive{cursor:pointer;transition:border-color .2s,background .2s,transform .2s}
+.math-step.interactive:hover{background:#0d1930;transform:translateY(-1px)}
+.math-step.interactive:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.math-step-hint{display:block;margin-top:5px;color:var(--accent);font-size:10px;font-weight:500}
 .math-body{font-size:13px;line-height:1.8;margin-top:8px}
 .math-line{overflow-x:auto;padding:6px 0}
 #mathSteps{max-height:420px;overflow:auto}
+.formula-details>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;list-style:none;font-size:14px;font-weight:700}
+.formula-details>summary::-webkit-details-marker{display:none}
+.formula-details>summary::after{content:"Tampilkan";flex:0 0 auto;color:var(--accent);font-size:11px;font-weight:600}
+.formula-details[open]>summary::after{content:"Sembunyikan"}
+.formula-details>summary:focus-visible{outline:2px solid var(--accent);outline-offset:5px;border-radius:3px}
+.formula-content{margin-top:14px;padding-top:2px;border-top:1px solid #26334e}
+.formula-content h3{margin:16px 0 6px;font-size:13px;color:var(--text)}
+.formula-content p{margin:6px 0}
+.formula-content mjx-container[display="true"]{overflow-x:auto;overflow-y:hidden;padding:5px 0}
+dialog.variable-dialog{width:min(620px,calc(100vw - 32px));max-height:82vh;padding:0;border:1px solid #3c5278;border-radius:14px;background:var(--panel);color:var(--text);box-shadow:0 24px 80px #000a}
+dialog.variable-dialog::backdrop{background:#030712bf;backdrop-filter:blur(3px)}
+.dialog-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 18px;border-bottom:1px solid #26334e}
+.dialog-head h2{margin:0;font-size:16px}
+.dialog-close{flex:0 0 auto;width:34px;height:34px;padding:0;font-size:22px;line-height:1;background:#263552}
+.dialog-body{padding:16px 18px 18px;overflow:auto}
+.dialog-body>p{margin:0 0 12px;color:var(--muted);font-size:12px;line-height:1.6}
+.variable-sources{display:grid;grid-template-columns:minmax(90px,auto) minmax(120px,.9fr) 1.4fr;border:1px solid #26334e;border-radius:10px;overflow:auto}
+.variable-symbol,.variable-value,.variable-origin,.variable-heading{padding:9px 10px;border-bottom:1px solid #26334e;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.variable-heading{background:#111d34;color:var(--text);font-weight:700}
+.variable-symbol{background:#0a1120;color:#cfe0ff;font-weight:700}
+.variable-value{background:#0c1527;color:var(--good);font-family:ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap}
+.variable-origin{color:var(--muted)}
+.variable-sources>:nth-last-child(-n+3){border-bottom:0}
+.dialog-section-title{margin:18px 0 4px;font-size:13px}
+.dialog-section-note{margin-bottom:8px!important;font-size:11px!important}
+.process-values{padding:9px 10px;border:1px solid #26334e;border-radius:10px;background:#08101d;font-size:12px;line-height:1.6}
+.process-value-line{overflow-x:auto;padding:5px 0;border-bottom:1px solid #1e2b45}
+.process-value-line:last-child{border-bottom:0}
+.process-values mjx-container{margin:0!important}
 #networkWrap{background:radial-gradient(circle at center,#131d34,#090f1d);border:1px solid #253453;border-radius:14px;min-height:560px;position:relative;overflow:auto}
 svg{display:block;width:100%;height:560px;min-width:760px}
 .edge{stroke:#516480;stroke-width:1.2;opacity:.38;transition:.2s}
@@ -182,22 +215,73 @@ th:first-child,td:first-child{text-align:left}
     </div>
 
     <div class="card">
-      <h2>Rumus yang Dipakai</h2>
-      <div class="small">
-        <p>Model memakai neural network feedforward (fully connected). Arsitektur default adalah 4 input → 4 neuron hidden → 4 neuron hidden → 1 output. Setiap neuron menerima semua output dari layer sebelumnya.</p>
-        <p><b>Normalisasi min–max:</b> x_normal = (x − min_training) / (max_training − min_training). Jika min = max, nilainya menjadi 0. Input prediksi memakai min dan max yang sama dari data training.</p>
-        <p><b>Forward:</b> z = Σ(w × a_sebelumnya) + b, lalu a = f(z). w adalah bobot, b adalah bias, dan a adalah aktivasi neuron.</p>
-        <p><b>Fungsi aktivasi:</b> sigmoid(z) = 1 / (1 + exp(−z)) dengan turunan a × (1 − a); tanh(z) dengan turunan 1 − a²; ReLU(z) = max(0, z) dengan turunan 1 jika z &gt; 0, selain itu 0; linear(z) = z dengan turunan 1. Default hidden dan output memakai sigmoid.</p>
-        <p><b>Loss per sample:</b> L = ½ × (ŷ − y)², yaitu setengah squared error. ŷ adalah prediksi dan y adalah target asli. Average loss saat Train All adalah rata-rata loss semua sample.</p>
-        <p><b>Backward (chain rule):</b> delta output δ = (ŷ − y) × f′(z). Delta hidden δ = Σ(w_layer_berikutnya × δ_layer_berikutnya) × f′(z). Gradien bobot ∂L/∂w = δ × a_sebelumnya; gradien bias ∂L/∂b = δ.</p>
-        <p><b>Update dengan stochastic gradient descent:</b> w_baru = w − η × ∂L/∂w dan b_baru = b − η × δ. η adalah learning rate. Train 1 Step memperbarui bobot untuk satu sample; Train All memperbarui bobot per sample, berulang sesuai jumlah epoch. Tombol Backward hanya menampilkan gradien.</p>
-        <p><b>Predict:</b> hanya normalisasi dan forward dengan bobot saat ini. Tidak membutuhkan target, tidak menghitung loss, dan tidak memperbarui bobot. Untuk target rain dengan output sigmoid, hasil mendekati 0 mengarah ke tidak hujan dan mendekati 1 mengarah ke hujan.</p>
-      </div>
+      <details class="formula-details">
+        <summary>Rumus yang Dipakai</summary>
+        <div class="formula-content small">
+          <p>Model memakai neural network feedforward (fully connected). Arsitektur default adalah 4 input → 4 neuron hidden → 4 neuron hidden → 1 output. Setiap neuron menerima semua output dari layer sebelumnya.</p>
+
+          <h3>Normalisasi min–max</h3>
+          \[
+            x_{\mathrm{normal}} = \frac{x-\min_{\mathrm{training}}}{\max_{\mathrm{training}}-\min_{\mathrm{training}}}
+          \]
+          <p>Jika minimum sama dengan maksimum, nilainya menjadi 0. Input prediksi memakai minimum dan maksimum dari data training.</p>
+
+          <h3>Forward propagation</h3>
+          \[
+            z_j^{(l)} = \sum_i w_{ji}^{(l)}a_i^{(l-1)} + b_j^{(l)},
+            \qquad a_j^{(l)} = f\!\left(z_j^{(l)}\right)
+          \]
+          <p>Di sini, \(w\) adalah bobot, \(b\) adalah bias, dan \(a\) adalah aktivasi neuron.</p>
+
+          <h3>Fungsi aktivasi</h3>
+          \[
+            \sigma(z)=\frac{1}{1+e^{-z}}, \qquad \sigma'(z)=a(1-a)
+          \]
+          \[
+            \tanh'(z)=1-a^2, \qquad
+            \operatorname{ReLU}(z)=\max(0,z), \qquad
+            \operatorname{ReLU}'(z)=
+            \begin{cases}1,&amp;z>0\\0,&amp;z\le 0\end{cases}
+          \]
+          \[
+            \operatorname{linear}(z)=z, \qquad \operatorname{linear}'(z)=1
+          \]
+          <p>Secara default, hidden layer dan output memakai sigmoid.</p>
+
+          <h3>Loss per sample</h3>
+          \[
+            L = \frac{1}{2}(\hat{y}-y)^2
+          \]
+          <p>Nilai \(\hat{y}\) adalah prediksi dan \(y\) adalah target asli. Average loss saat Train All adalah rata-rata loss seluruh sample.</p>
+
+          <h3>Backward propagation (chain rule)</h3>
+          \[
+            \delta_{\mathrm{output}}=(\hat{y}-y)f'(z)
+          \]
+          \[
+            \delta_j^{(l)}=\left(\sum_k w_{kj}^{(l+1)}\delta_k^{(l+1)}\right)f'\!\left(z_j^{(l)}\right)
+          \]
+          \[
+            \frac{\partial L}{\partial w_{ji}^{(l)}}=\delta_j^{(l)}a_i^{(l-1)},
+            \qquad \frac{\partial L}{\partial b_j^{(l)}}=\delta_j^{(l)}
+          \]
+
+          <h3>Stochastic gradient descent</h3>
+          \[
+            w_{\mathrm{baru}}=w-\eta\frac{\partial L}{\partial w},
+            \qquad b_{\mathrm{baru}}=b-\eta\frac{\partial L}{\partial b}
+          \]
+          <p>Nilai \(\eta\) adalah learning rate. Train 1 Step memperbarui bobot untuk satu sample; Train All memperbarui bobot per sample dan mengulangnya sesuai jumlah epoch. Tombol Backward hanya menampilkan gradien.</p>
+
+          <h3>Predict</h3>
+          <p>Predict hanya menjalankan normalisasi dan forward dengan bobot saat ini. Proses ini tidak membutuhkan target, tidak menghitung loss, dan tidak memperbarui bobot. Untuk target rain dengan output sigmoid, hasil mendekati 0 mengarah ke tidak hujan dan hasil mendekati 1 mengarah ke hujan.</p>
+        </div>
+      </details>
     </div>
 
     <div class="card">
       <h2>Live Math Process</h2>
-      <p class="small">Perhitungan mengikuti layer yang menyala. a = aktivasi, z = weighted sum, δ = gradien terhadap z. Angka ditampilkan hingga 6 desimal.</p>
+      <p class="small">Perhitungan mengikuti layer yang menyala. a = aktivasi, z = weighted sum, δ = gradien terhadap z. Angka ditampilkan hingga 6 desimal. Klik salah satu proses untuk melihat asal dan nilai setiap variabel.</p>
       <div id="mathSteps" aria-live="polite">Klik Forward, Backward, atau Train 1 Step untuk melihat proses matematika.</div>
     </div>
 
@@ -207,6 +291,20 @@ th:first-child,td:first-child{text-align:left}
     </div>
   </main>
 </div>
+
+<dialog id="variableDialog" class="variable-dialog" aria-labelledby="variableDialogTitle">
+  <div class="dialog-head">
+    <h2 id="variableDialogTitle">Detail Variabel</h2>
+    <button id="variableDialogClose" class="dialog-close" type="button" aria-label="Tutup popup">×</button>
+  </div>
+  <div class="dialog-body">
+    <p id="variableDialogIntro"></p>
+    <div id="variableSources" class="variable-sources"></div>
+    <h3 class="dialog-section-title">Detail substitusi angka</h3>
+    <p class="dialog-section-note">Nilai merupakan snapshot saat proses dijalankan, sehingga tetap cocok meskipun parameter network kemudian berubah.</p>
+    <div id="variableValues" class="process-values"></div>
+  </div>
+</dialog>
 
 <script src="./nnplay.js"></script>
 <script async id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
